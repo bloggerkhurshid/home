@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Homepage</title>
+  <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f9fafc;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      color: #444;
+      animation: fadeIn 0.8s ease;
+    }
+
+    /* Search */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 0.5rem 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      padding: 0.5rem;
+      background: transparent;
+    }
+
+    /* Shortcuts */
+    .shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .shortcut {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #333;
+      width: 70px;
+      height: 70px;
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+    }
+
+    .shortcut:hover {
+      transform: translateY(-5px);
+      background: #f0f2f5;
+    }
+
+    .shortcut i {
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Notes */
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1rem;
+    }
+
+    .notes-header h2 {
+      font-size: 1.2rem;
+      color: #444;
+    }
+
+    .add-btn {
+      background: #4cafef;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+
+    .add-btn:hover {
+      background: #399ddc;
+    }
+
+    .notes-container {
+      width: 100%;
+      max-width: 700px;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .note-card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      max-height: 100px;
+      position: relative;
+    }
+
+    .note-card.expanded {
+      max-height: 500px;
+    }
+
+    .note-preview {
+      font-size: 0.9rem;
+      color: #555;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 60px; /* leave space for copy button */
+    }
+
+    .note-full {
+      display: none;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .note-card.expanded .note-full {
+      display: block;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: none;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      background: #4caf50;
+      color: white;
+    }
+
+    .copy-btn:hover {
+      background: #3e9c42;
+    }
+
+    .delete-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      background: #ff5252;
+      color: white;
+      display: none;
+      margin-top: 0.8rem;
+    }
+
+    .note-card.expanded .delete-btn {
+      display: inline-block;
+    }
+
+    /* Modal Popup */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content textarea {
+      width: 100%;
+      height: 120px;
+      resize: none;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .modal-btn {
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .cancel-btn {
+      background: #ddd;
+    }
+
+    .save-btn {
+      background: #4cafef;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Welcome Back</h1>
+
+  <!-- Google Search -->
+  <form class="search-box" action="https://www.google.com/search" method="GET">
+    <input type="text" name="q" placeholder="Search Google..." autocomplete="off" />
+  </form>
+
+  <!-- Shortcuts -->
+  <div class="shortcuts">
+    <a class="shortcut" href="https://youtube.com" target="_blank"><i class="lucide-play-circle"></i>YouTube</a>
+    <a class="shortcut" href="https://chat.openai.com" target="_blank"><i class="lucide-message-circle"></i>ChatGPT</a>
+    <a class="shortcut" href="https://bolt.new" target="_blank"><i class="lucide-zap"></i>BoltAI</a>
+    <a class="shortcut" href="https://claude.ai" target="_blank"><i class="lucide-brain"></i>Claude</a>
+    <a class="shortcut" href="https://perplexity.ai" target="_blank"><i class="lucide-search"></i>Perplexity</a>
+    <a class="shortcut" href="https://x.com/grok" target="_blank"><i class="lucide-robot"></i>Grok</a>
+    <a class="shortcut" href="https://gemini.google.com" target="_blank"><i class="lucide-sparkles"></i>Gemini</a>
+  </div>
+
+  <!-- Notes -->
+  <div class="notes-header">
+    <h2>📝 Notes</h2>
+    <button class="add-btn" id="addNoteBtn">+ Add Note</button>
+  </div>
+  <div class="notes-container" id="notesContainer"></div>
+
+  <!-- Custom Modal -->
+  <div class="modal" id="noteModal">
+    <div class="modal-content">
+      <h3>Add a Note</h3>
+      <textarea id="noteInput" placeholder="Write your note here..."></textarea>
+      <div class="modal-actions">
+        <button class="modal-btn cancel-btn" id="cancelBtn">Cancel</button>
+        <button class="modal-btn save-btn" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const notesContainer = document.getElementById("notesContainer");
+    const addNoteBtn = document.getElementById("addNoteBtn");
+    const noteModal = document.getElementById("noteModal");
+    const noteInput = document.getElementById("noteInput");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn = document.getElementById("saveBtn");
+
+    let notes = JSON.parse(localStorage.getItem("notesList") || "[]");
+
+    function saveNotes() {
+      localStorage.setItem("notesList", JSON.stringify(notes));
+    }
+
+    function renderNotes() {
+      notesContainer.innerHTML = "";
+      notes.forEach((note, index) => {
+        const card = document.createElement("div");
+        card.className = "note-card";
+        card.innerHTML = `
+          <div class="note-preview">${note.slice(0, 60)}...</div>
+          <div class="note-full">${note}</div>
+          <button class="copy-btn">Copy</button>
+          <button class="delete-btn">Delete</button>
+        `;
+        card.addEventListener("click", (e) => {
+          if (e.target.classList.contains("delete-btn")) {
+            notes.splice(index, 1);
+            saveNotes();
+            renderNotes();
+          } else if (e.target.classList.contains("copy-btn")) {
+            navigator.clipboard.writeText(note);
+            e.target.textContent = "Copied!";
+            setTimeout(() => e.target.textContent = "Copy", 1500);
+          } else {
+            card.classList.toggle("expanded");
+          }
+        });
+        notesContainer.appendChild(card);
+      });
+    }
+
+    // Open modal
+    addNoteBtn.addEventListener("click", () => {
+      noteInput.value = "";
+      noteModal.classList.add("active");
+      noteInput.focus();
+    });
+
+    // Close modal
+    cancelBtn.addEventListener("click", () => {
+      noteModal.classList.remove("active");
+    });
+
+    // Save note
+    saveBtn.addEventListener("click", () => {
+      const text = noteInput.value.trim();
+      if (text) {
+        notes.push(text);
+        saveNotes();
+        renderNotes();
+        noteModal.classList.remove("active");
+      }
+    });
+
+    renderNotes();
+  </script>
+</body>
+</html>
